@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <% include ../partials/header.ejs %>
+</head>
+
+<body>
+<script>
+  var socket = io();
+  var Note = {};
+  Note.entries = [];
+
+  Note.draw = function () {
+    var i = 0;
+    $('#dbUL').empty();
+    for ( i = 0; i < this.entries.length; i++ ) {
+      $('#dbUL').append("<li id='note"+(i+1)+"'>"+this.entries[i].content+"</li>");
+    }
+  }
+
+  Note.createEntry = function ( ) {
+    socket.emit('addNoteEntry',"payload!");
+  }
+
+
+  var Recipe = {};
+  Recipe.ingredients = [];
+
+
+
+  Recipe.draw = function () {
+    var i = 0;
+    $('#dbUL').empty();
+    for ( i = 0; i < this.ingredients.length; i++ ) {
+      $('#dbUL').append("<li id='ingredient"+(i+1)+"'>"+this.ingredients[i].name+" | "+ this.ingredients[i].qty+" "+this.ingredients[i].unit+"</li>");
+    }
+  }
+  Recipe.addIngredient = function ( name, unit, qty ) {
+    this.ingredients.push({name: name, unit: unit, qty: qty});
+    this.draw();
+  };
+  Recipe.removeIngredient = function ( listPosition ) {
+    var indexOffset = 1;
+    this.ingredients.splice(listPosition-indexOffset,1);
+    this.draw();
+  };
+
+  console.log(Recipe);
+  console.log(Recipe.ingredients);
+
+  socket.on('updateCommand', function ( data ) {
+  		$("#lastCommandDisplay").text(data.command);
+      if (data.command == "order for") {
+        console.log("orderfor/"+data.args.displayString);
+        $("#displayText").text("ORDER FOR "+data.args.displayString);
+      }
+      if (data.command == "switch") {
+        console.log("switch command called");
+        $("#panel2").css("border","2px black solid");
+      }
+      if (data.command == "recipe") {
+
+      }
+      if ( data.command == "panel" ) {
+
+      }
+      if ( data.command == "create note" ) {
+        $("#panelTitle").text(data.args);
+      }
+
+      //each panel has its own logic that is triggered by the updateCommand event
+      //panels process commands on their own. They do not also poll
+      //the db on their own. All requests are handled by the index page logic
+      //panels can/should? be their own objects that add their own panel to the DOM
+  });
+  socket.on('addNoteEntry', function(data) {
+    $('#dbUL').append("<li id='noteEntry"+data.entryid+"'>"+data.entryid+"|"+data.args+"</li>");
+
+  });
+  socket.on('changeState', function (data) {
+    $('#currentStateDisplay').text(data);
+  });
+  socket.on('openNote', function (data) {
+      console.log("Open note data: ");
+      console.log(data);
+      $("#dbUL").empty();
+      $("#panelTitle").text(data.title);
+      for ( var i = 0; i < data.entries.length; i++ ) {
+        entryid = data.entries[i].entryid;
+        $("#dbUL").append("<li id='noteEntry"+entryid+"'>"+entryid+"|"+data.entries[i].content+"</li>");
+      }
+  });
+  socket.on('deleteEntry',function(entryId) {
+    console.log("deleteEntry "+entryId);
+    $("#noteEntry"+entryId).remove();
+  });
+</script>
+  <% include ../partials/nav.ejs %>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-6" id="panel1"><h1 id="panelTitle">Panel 1</h1>
+      <ul id="dbUL">
+        
+      </ul>
+    </div>
+    <div class="col-sm-6" id="panel2">Panel TEST
+      <div class="container" id="panel2Body"><h2 id="displayText"></h2></div>
+  </div>    
+</div>
+
+
+</body>
+</html>
