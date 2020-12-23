@@ -15,7 +15,8 @@ io.on('connection', function (socket) {
 	});
 
 	socket.on('textCommand', function ( data ) {
-		io.sockets.emit('textCommandResponse',{ response: executeCommand(data.command)});
+		let command = executeCommand(data.command);
+		io.sockets.emit('textCommandResponse',{ response: command});
 		//executeCommand does not work in this implementaxtion. Currently requires request and response objects. Can we separate this logic so that we just have one executeCommand function?
 		//executeCommand(processRawCommandData(data.command));
 	});
