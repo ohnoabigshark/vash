@@ -316,7 +316,7 @@ app.get('/', function(request, response) {
 
 app.post('/', function ( request, response ) { 
 
-	console.log("Posted something weopsedf");
+	console.log("Posted something!");
 	//response.send('blurg');
 } ); 
 

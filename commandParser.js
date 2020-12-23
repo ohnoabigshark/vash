@@ -6,14 +6,59 @@
 //close panel
 //{ command: command, args: { } }
 
-var CommandParser =  function (  ) {
 
+
+//Should CommandLibrary be the parent object and each contains a CommandParser?
+//CommandParser could just be a singletons
+//CommandParser constructor should take a CommandLibrary object
+//CommandLibrary is just a Map
+//OR...should each Command have its own CommandLibrary?
+let CommandParser =  function ( library ) {
+	this.library = library;
 }
 
 CommandParser.parseTokens = function ( str ) {
 	var rawTokens = [];
 	rawTokens = str.split(" ");
 	switch ( rawTokens[0] )
+}
+
+CommandParser.smartParse = function ( commandString ) {
+	let vashCommand = { action: "", args: "", error: false, errorMessage: "" };
+	let commandTokens = [];
+
+	//Check commandString for undefined/null to ensure we have some data to work with
+	//return error if no data is present
+	if ( typeof commandString === 'undefined' ) {
+		vashCommand.error = true;
+		vashCommand.errorMessage = "commandString undefined"
+		return vashCommand;
+	} else if ( typeof commandString != "String" ) {
+		vashCommand.error = true;
+		vashCommand.errorMessage = "commandString is not a string";
+		return vashCommand;
+	} else if ( commandString.length <= 0 ) {
+		vashCommand.error = true;
+		vashCommand.errorMessage = "commandString contains no data";
+		return vashCommand;
+	} else {
+		commandTokens = commandString.split(" ");
+	}
+
+	
+	return vashCommand;
+
+}
+
+//Check to see if string is a command
+CommandParser.isCommand = function ( str ) {
+
+	//does CommandLibrary contain the key?
+	if ( library.has(str) ) {
+		return true;
+	}
+	return false;
+
 }
 
 CommandParser.parseCommand = function ( rawCommand ) { 
