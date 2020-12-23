@@ -15,7 +15,7 @@ io.on('connection', function (socket) {
 	});
 
 	socket.on('textCommand', function ( data ) {
-		io.sockets.emit('textCommandResponse',{ response: processRawCommandData(data.command)});
+		io.sockets.emit('textCommandResponse',{ response: executeCommand(data.command)});
 		//executeCommand does not work in this implementaxtion. Currently requires request and response objects. Can we separate this logic so that we just have one executeCommand function?
 		//executeCommand(processRawCommandData(data.command));
 	});
@@ -221,12 +221,11 @@ var processRawCommandData = function ( rawCommand ) {
 	return command;
 }
 
-var executeCommand = function ( request, response ) {
-	var commandText = request.body.commandText;
+var executeCommand = function ( rawCmd ) {
+	var commandText = rawCmd;
 	commandText = commandText.replace(/[\\$"]/g, "\\$&"); //escape the string
 	commandText = commandText.replace(/[']/g, "\'$&"); //escape the string	
-	var commandNumber = request.body.commandNumber;
-	console.log("CommandText from IFTTT: "+commandText);
+	console.log("CommandText from parserTest.js: "+commandText);
 	var sqlQuery = "INSERT INTO rawCommands (command) values ('"+commandText+"')";
 	//response.send("Post request");
 	//console.log("Query: "+sqlQuery);
@@ -236,7 +235,7 @@ var executeCommand = function ( request, response ) {
 			//we need to escape the command input/output to hanlde quotations and what not!!!
 			if(err){
 				//console.error(err); response.send("Error " + err);
-				console.log("Query Error");
+				console.log("executeCommand function had a Query Error");
 			}
 			else {
 				console.log("Query success!!");
@@ -244,7 +243,7 @@ var executeCommand = function ( request, response ) {
 				var rawCommandData = commandText.split(" ");
 				var commandData;
 				if ( rawCommandData.length < 1 ) {
-					response.end();
+					
 					return;
 				}
 				console.log("command: "+command.command+" state: "+VASH.state);
@@ -287,7 +286,8 @@ var executeCommand = function ( request, response ) {
 
 				console.log("Command Data: "+commandData);
 				io.emit('updateCommand',commandData);
-				response.end();
+				return command;
+				//response.end();
 				//response.render('pages/db', { results: result.rows } );
 			}
 
